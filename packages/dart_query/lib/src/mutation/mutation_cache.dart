@@ -31,7 +31,7 @@ class MutationCache extends Subscribable<MutationCacheListener> {
   final om.OnlineManager _onlineManager;
 
   final void Function(Object error, Object? variables, Object? context, Mutation mutation)? onError;
-  final void Function(Object data, Object? variables, Object? context, Mutation mutation)? onSuccess;
+  final void Function(Object? data, Object? variables, Object? context, Mutation mutation)? onSuccess;
   final void Function(Object? variables, Mutation mutation)? onMutate;
   final void Function(Object? data, Object? error, Object? variables, Object? context, Mutation mutation)? onSettled;
 
@@ -58,6 +58,23 @@ class MutationCache extends Subscribable<MutationCacheListener> {
       canRunCheck: (m) => canRun(m),
       runNextCallback: (m) => runNext(m),
       cacheNotify: (event) => _handleMutationNotify(event),
+      cacheCallbacks: CacheLevelCallbacks(
+        onMutate: onMutate != null
+            ? (variables, mutation) async => onMutate!(variables, mutation as Mutation)
+            : null,
+        onSuccess: onSuccess != null
+            ? (data, variables, context, mutation) async =>
+                onSuccess!(data, variables, context, mutation as Mutation)
+            : null,
+        onError: onError != null
+            ? (error, variables, context, mutation) async =>
+                onError!(error, variables, context, mutation as Mutation)
+            : null,
+        onSettled: onSettled != null
+            ? (data, error, variables, context, mutation) async =>
+                onSettled!(data, error, variables, context, mutation as Mutation)
+            : null,
+      ),
       notifyManager: _notifyManager,
       focusManager: _focusManager,
       onlineManager: _onlineManager,

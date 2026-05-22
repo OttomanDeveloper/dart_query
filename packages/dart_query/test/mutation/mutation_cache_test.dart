@@ -151,4 +151,101 @@ void main() {
       expect(cache.canRun(m2), isTrue);
     });
   });
+
+  group('MutationCache — cache-level callbacks', () {
+    test('onMutate fires before instance onMutate', () async {
+      final order = <String>[];
+      final focus = FocusManager()..setFocused(true);
+      final online = OnlineManager()..setOnline(true);
+      cache = MutationCache(
+        notifyManager: notify,
+        focusManager: focus,
+        onlineManager: online,
+        onMutate: (variables, mutation) async => order.add('cache_onMutate'),
+      );
+      final m = cache.build<String, String>(
+        config: MutationConfig(
+          mutationFn: (v) async {
+            order.add('fn');
+            return 'ok';
+          },
+          onMutate: (v) async {
+            order.add('instance_onMutate');
+            return null;
+          },
+        ),
+      );
+      await m.execute('input');
+      expect(order.indexOf('cache_onMutate'), lessThan(order.indexOf('instance_onMutate')));
+      expect(order.indexOf('instance_onMutate'), lessThan(order.indexOf('fn')));
+    });
+
+    test('onSuccess fires cache-level before instance-level', () async {
+      final order = <String>[];
+      final focus = FocusManager()..setFocused(true);
+      final online = OnlineManager()..setOnline(true);
+      cache = MutationCache(
+        notifyManager: notify,
+        focusManager: focus,
+        onlineManager: online,
+        onSuccess: (data, vars, ctx, mutation) async => order.add('cache_onSuccess'),
+        onSettled: (data, error, vars, ctx, mutation) async => order.add('cache_onSettled'),
+      );
+      final m = cache.build<String, String>(
+        config: MutationConfig(
+          mutationFn: (v) async => 'ok',
+          onSuccess: (data, v, ctx) async => order.add('instance_onSuccess'),
+          onSettled: (data, error, v, ctx) async => order.add('instance_onSettled'),
+        ),
+      );
+      await m.execute('input');
+      expect(order, [
+        'cache_onSuccess',
+        'instance_onSuccess',
+        'cache_onSettled',
+        'instance_onSettled',
+      ]);
+    });
+
+    test('onError fires cache-level before instance-level', () async {
+      final order = <String>[];
+      final focus = FocusManager()..setFocused(true);
+      final online = OnlineManager()..setOnline(true);
+      cache = MutationCache(
+        notifyManager: notify,
+        focusManager: focus,
+        onlineManager: online,
+        onError: (error, vars, ctx, mutation) async => order.add('cache_onError'),
+        onSettled: (data, error, vars, ctx, mutation) async => order.add('cache_onSettled'),
+      );
+      final m = cache.build<String, String>(
+        config: MutationConfig(
+          mutationFn: (v) async => throw Exception('fail'),
+          onError: (error, v, ctx) async => order.add('instance_onError'),
+          onSettled: (data, error, v, ctx) async => order.add('instance_onSettled'),
+        ),
+      );
+      try { await m.execute('input'); } catch (_) {}
+      expect(order, [
+        'cache_onError',
+        'instance_onError',
+        'cache_onSettled',
+        'instance_onSettled',
+      ]);
+    });
+  });
+
+  group('MutationCache — mutationKey and meta', () {
+    test('mutation stores mutationKey and meta from config', () {
+      final m = cache.build<String, String>(
+        config: MutationConfig(
+          mutationFn: (v) async => v,
+          mutationKey: ['todos', 'create'],
+          meta: {'source': 'test'},
+        ),
+      );
+      expect(m.mutationKey, ['todos', 'create']);
+      expect(m.meta, {'source': 'test'});
+    });
+  });
 }

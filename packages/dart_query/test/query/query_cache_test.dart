@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fake_async/fake_async.dart';
 import 'package:test/test.dart';
 import 'package:dart_query/src/query/query_cache.dart';
@@ -285,6 +286,70 @@ void main() {
         await query.fetch();
       } catch (_) {}
       expect(errorObj, isA<Exception>());
+    });
+
+    test('onSettled fires on both success and error', () async {
+      var settledCount = 0;
+      cache = QueryCache(
+        notifyManager: notify,
+        onSettled: (data, error, query) => settledCount++,
+      );
+      final q1 = cache.build<String>(
+        queryKey: QueryKey(['success']),
+        queryFn: () async => 'ok',
+      );
+      await q1.fetch();
+      expect(settledCount, 1);
+
+      final q2 = cache.build<String>(
+        queryKey: QueryKey(['error']),
+        queryFn: () async => throw Exception('fail'),
+      );
+      try { await q2.fetch(); } catch (_) {}
+      expect(settledCount, 2);
+    });
+  });
+
+  group('QueryCache — findAll advanced filters', () {
+    test('filters by stale', () {
+      cache.build<String>(
+        queryKey: QueryKey(['fresh']),
+        queryFn: () async => '',
+        initialData: 'data',
+      );
+      cache.build<String>(
+        queryKey: QueryKey(['nodata']),
+        queryFn: () async => '',
+      );
+      // fresh query has data and is NOT stale (staleTime=0 but data was just set)
+      final staleResults = cache.findAll(stale: true);
+      // nodata query has no data — always stale
+      // fresh query has data set at Duration.zero staleTime — also stale
+      // Both are stale because _matchQuery uses Duration.zero for stale check
+      expect(staleResults.length, 2);
+
+      final notStale = cache.findAll(stale: false);
+      expect(notStale.length, 0);
+    });
+
+    test('filters by fetchStatus', () async {
+      final q = cache.build<String>(
+        queryKey: QueryKey(['fetching']),
+        queryFn: () => Completer<String>().future,
+        networkMode: NetworkMode.always,
+      );
+      unawaited(q.fetch().catchError((_) => ''));
+      await Future.delayed(Duration.zero);
+
+      cache.build<String>(
+        queryKey: QueryKey(['idle']),
+        queryFn: () async => '',
+      );
+
+      final fetching = cache.findAll(fetchStatus: FetchStatus.fetching);
+      expect(fetching.length, 1);
+      expect(fetching.first.queryHash, contains('fetching'));
+      q.destroy();
     });
   });
 }

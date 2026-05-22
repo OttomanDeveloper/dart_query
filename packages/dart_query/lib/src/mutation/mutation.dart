@@ -17,6 +17,8 @@ class MutationScope {
 class MutationConfig<TData, TVariables> {
   final MutationFn<TData, TVariables> mutationFn;
   final MutationScope? scope;
+  final List<Object?>? mutationKey;
+  final Map<String, Object?>? meta;
   final int retryCount;
   final Duration Function(int) retryDelay;
   final NetworkMode networkMode;
@@ -28,6 +30,8 @@ class MutationConfig<TData, TVariables> {
   const MutationConfig({
     required this.mutationFn,
     this.scope,
+    this.mutationKey,
+    this.meta,
     this.retryCount = 0,
     this.retryDelay = _defaultDelay,
     this.networkMode = NetworkMode.online,
@@ -43,6 +47,15 @@ class MutationConfig<TData, TVariables> {
 typedef MutationUpdateCallback = void Function(MutationActionType action);
 typedef MutationCacheCallback = void Function(Map<String, Object?> event);
 
+class CacheLevelCallbacks {
+  final Future<void> Function(Object? variables, Object mutation)? onMutate;
+  final Future<void> Function(Object? data, Object? variables, Object? context, Object mutation)? onSuccess;
+  final Future<void> Function(Object error, Object? variables, Object? context, Object mutation)? onError;
+  final Future<void> Function(Object? data, Object? error, Object? variables, Object? context, Object mutation)? onSettled;
+
+  const CacheLevelCallbacks({this.onMutate, this.onSuccess, this.onError, this.onSettled});
+}
+
 class Mutation<TData, TVariables> extends Removable {
   final int mutationId;
   final MutationConfig<TData, TVariables> config;
@@ -52,6 +65,7 @@ class Mutation<TData, TVariables> extends Removable {
   final bool Function(Mutation)? _canRunCheck;
   final void Function(Mutation)? _runNextCallback;
   final MutationCacheCallback? _cacheNotify;
+  final CacheLevelCallbacks _cacheCallbacks;
 
   MutationState<TData> state;
   final List<MutationUpdateCallback> _observers = [];
@@ -65,6 +79,7 @@ class Mutation<TData, TVariables> extends Removable {
     bool Function(Mutation)? canRunCheck,
     void Function(Mutation)? runNextCallback,
     MutationCacheCallback? cacheNotify,
+    CacheLevelCallbacks cacheCallbacks = const CacheLevelCallbacks(),
     nm.NotifyManager? notifyManager,
     fm.FocusManager? focusManager,
     om.OnlineManager? onlineManager,
@@ -74,12 +89,15 @@ class Mutation<TData, TVariables> extends Removable {
         _canRunCheck = canRunCheck,
         _runNextCallback = runNextCallback,
         _cacheNotify = cacheNotify,
+        _cacheCallbacks = cacheCallbacks,
         state = state ?? MutationState<TData>(),
         super(gcTime: gcTime) {
     scheduleGc();
   }
 
   MutationScope? get scope => config.scope;
+  List<Object?>? get mutationKey => config.mutationKey;
+  Map<String, Object?>? get meta => config.meta;
 
   // --- Observers ---
 
@@ -109,16 +127,23 @@ class Mutation<TData, TVariables> extends Removable {
 
   Future<TData> execute(TVariables variables) async {
     final isPaused = !(_canRunCheck?.call(this) ?? true);
+
+    // Step 1: dispatch pending
     _dispatch(MutationActionType.pending, variables: variables, isPaused: isPaused);
 
+    // Step 2: cache-level onMutate
+    try { await _cacheCallbacks.onMutate?.call(variables, this); } catch (_) {}
+
+    // Step 3: instance-level onMutate — context flows through
     Object? context;
-    try {
-      context = await config.onMutate?.call(variables);
-    } catch (_) {}
+    try { context = await config.onMutate?.call(variables); } catch (_) {}
+
+    // Step 4: re-dispatch pending with context
     if (context != null) {
       _dispatch(MutationActionType.pending, variables: variables, context: context, isPaused: isPaused);
     }
 
+    // Step 5: create retryer and execute
     _retryer = Retryer<TData>(
       fn: () => config.mutationFn(variables),
       retryCount: config.retryCount,
@@ -136,26 +161,38 @@ class Mutation<TData, TVariables> extends Removable {
     try {
       final data = await _retryer!.start();
 
-      // Success path — cache-level then instance-level
+      // Step 6: SUCCESS — cache-level BEFORE instance-level
+      try { await _cacheCallbacks.onSuccess?.call(data, variables, context, this); } catch (_) {}
       try { await config.onSuccess?.call(data, variables, context); } catch (_) {}
+      try { await _cacheCallbacks.onSettled?.call(data, null, variables, context, this); } catch (_) {}
       try { await config.onSettled?.call(data, null, variables, context); } catch (_) {}
 
       _dispatch(MutationActionType.success, data: data);
       return data;
     } catch (error) {
-      // Error path — each callback isolated
+      // Step 7: ERROR — cache-level BEFORE instance-level
+      try { await _cacheCallbacks.onError?.call(error, variables, context, this); } catch (_) {}
       try { await config.onError?.call(error, variables, context); } catch (_) {}
+      try { await _cacheCallbacks.onSettled?.call(null, error, variables, context, this); } catch (_) {}
       try { await config.onSettled?.call(null, error, variables, context); } catch (_) {}
 
       _dispatch(MutationActionType.error, error: error);
       rethrow;
     } finally {
+      // Step 8: run next scoped mutation
       _runNextCallback?.call(this);
     }
   }
 
   Future<void> continueExecution() async {
-    _retryer?.resume();
+    if (_retryer != null) {
+      _retryer!.resume();
+    } else {
+      // Re-execute for restored mutations with no retryer
+      if (state.variables != null) {
+        await execute(state.variables as TVariables);
+      }
+    }
   }
 
   // --- State Machine ---

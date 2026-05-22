@@ -222,6 +222,9 @@ class QueryCache extends Subscribable<QueryCacheListener> {
         if (query.state.isError) {
           onError?.call(query.state.error!, query);
         }
+        if (query.state.isSuccess || query.state.isError) {
+          onSettled?.call(query.state.data, query.state.error, query);
+        }
       }
     }
   }
