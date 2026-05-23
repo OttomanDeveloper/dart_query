@@ -256,7 +256,7 @@ void main() {
       } catch (_) {}
       expect(query.state.status, QueryStatus.error);
       expect(query.state.fetchStatus, FetchStatus.idle);
-      expect(query.state.isInvalidated, isTrue);
+      expect(query.state.isInvalidated, isFalse);
     });
 
     test('fetch deduplication: returns same promise if already fetching', () async {

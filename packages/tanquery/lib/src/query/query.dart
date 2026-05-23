@@ -202,7 +202,6 @@ class Query<TData> extends Removable {
           fetchFailureReason: () => action.error,
           fetchStatus: FetchStatus.idle,
           status: QueryStatus.error,
-          isInvalidated: true,
         );
       case QueryActionType.invalidate:
         return currentState.copyWith(isInvalidated: true);

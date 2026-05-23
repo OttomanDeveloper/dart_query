@@ -65,7 +65,13 @@ class _InfiniteQueryBuilderState<TPage, TParam>
     if (oldWidget.queryKey != widget.queryKey ||
         oldWidget.staleTime != widget.staleTime ||
         oldWidget.enabled != widget.enabled ||
-        oldWidget.retryCount != widget.retryCount) {
+        oldWidget.retryCount != widget.retryCount ||
+        oldWidget.gcTime != widget.gcTime ||
+        oldWidget.maxPages != widget.maxPages ||
+        oldWidget.initialPageParam != widget.initialPageParam ||
+        !identical(oldWidget.queryFn, widget.queryFn) ||
+        !identical(oldWidget.getNextPageParam, widget.getNextPageParam) ||
+        !identical(oldWidget.getPreviousPageParam, widget.getPreviousPageParam)) {
       _unsubscribe?.call();
       _observer?.destroy();
       _createObserver();
