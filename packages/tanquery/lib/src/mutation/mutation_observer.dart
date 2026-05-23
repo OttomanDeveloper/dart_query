@@ -49,7 +49,7 @@ class MutationObserver<TData, TVariables> extends Subscribable<MutationObserverL
     _currentMutation = _cache.build<TData, TVariables>(config: _config);
     _currentMutation!.addObserver(_onMutationUpdate);
 
-    _currentMutation!.execute(variables).ignore();
+    _currentMutation!.execute(variables).then((_) {}, onError: (_) {});
   }
 
   Future<TData> mutateAsync(

@@ -137,7 +137,7 @@ class _InfiniteQueryBuilderState<TPage, TParam>
         newParams = newParams.sublist(1);
       }
       query.setData(InfiniteData<TPage, TParam>(pages: newPages, pageParams: newParams));
-    }).catchError((_) {}).whenComplete(() => _isFetchingPage = false);
+    }).then((_) {}, onError: (_) {}).whenComplete(() => _isFetchingPage = false);
   }
 
   void _fetchPreviousPage() {
@@ -167,7 +167,7 @@ class _InfiniteQueryBuilderState<TPage, TParam>
         newParams = newParams.sublist(0, newParams.length - 1);
       }
       query.setData(InfiniteData<TPage, TParam>(pages: newPages, pageParams: newParams));
-    }).catchError((_) {}).whenComplete(() => _isFetchingPage = false);
+    }).then((_) {}, onError: (_) {}).whenComplete(() => _isFetchingPage = false);
   }
 
   void _subscribe() {
