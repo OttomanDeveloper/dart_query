@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:tanquery/tanquery.dart';
 import 'package:tanquery_flutter/tanquery_flutter.dart';
 import 'query_list_view.dart';
@@ -50,10 +51,18 @@ class _DartQueryDevtoolsState extends State<DartQueryDevtools> {
     try {
       final client = DartQuery.of(context);
       _queryCacheUnsub = client.getQueryCache().subscribe((_) {
-        if (mounted) setState(() {});
+        if (mounted) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() {});
+          });
+        }
       });
       _mutationCacheUnsub = client.getMutationCache().subscribe((_) {
-        if (mounted) setState(() {});
+        if (mounted) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() {});
+          });
+        }
       });
     } catch (_) {}
   }
@@ -92,8 +101,9 @@ class _DartQueryDevtoolsState extends State<DartQueryDevtools> {
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(8),
+        clipBehavior: Clip.antiAlias,
         child: Container(
-          height: 360,
+          constraints: const BoxConstraints(maxHeight: 360),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
@@ -126,15 +136,15 @@ class _DartQueryDevtoolsState extends State<DartQueryDevtools> {
                       }),
                     ),
                     const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.delete_sweep, size: 16),
-                      tooltip: 'Clear all',
-                      onPressed: () {
+                    GestureDetector(
+                      onTap: () {
                         client.clear();
                         setState(() => _selectedQuery = null);
                       },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.delete_sweep, size: 16),
+                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
