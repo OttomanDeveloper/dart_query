@@ -1,0 +1,22 @@
+name: dart_query_devtools
+description: Visual devtools overlay for dart_query. Inspect query cache, mutation log, and query states in real-time.
+version: 0.1.0
+homepage: https://github.com/AhmedAbouelworworoud/dart_query
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dart_query:
+    path: ../dart_query
+  dart_query_flutter:
+    path: ../dart_query_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+resolution: workspace

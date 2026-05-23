@@ -1,0 +1,231 @@
+import 'package:flutter/material.dart';
+import 'package:dart_query/dart_query.dart';
+import 'package:dart_query_flutter/dart_query_flutter.dart';
+import 'query_list_view.dart';
+import 'query_detail_view.dart';
+import 'mutation_log_view.dart';
+
+class DartQueryDevtools extends StatefulWidget {
+  final bool enabled;
+  final Widget child;
+
+  const DartQueryDevtools({
+    super.key,
+    this.enabled = true,
+    required this.child,
+  });
+
+  @override
+  State<DartQueryDevtools> createState() => _DartQueryDevtoolsState();
+}
+
+class _DartQueryDevtoolsState extends State<DartQueryDevtools> {
+  bool _isOpen = false;
+  int _tabIndex = 0; // 0=queries, 1=mutations
+  Query? _selectedQuery;
+  String _filterText = '';
+  Unsubscribe? _queryCacheUnsub;
+  Unsubscribe? _mutationCacheUnsub;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _subscribeToCaches();
+  }
+
+  @override
+  void dispose() {
+    _queryCacheUnsub?.call();
+    _mutationCacheUnsub?.call();
+    super.dispose();
+  }
+
+  void _subscribeToCaches() {
+    _queryCacheUnsub?.call();
+    _mutationCacheUnsub?.call();
+
+    if (!widget.enabled) return;
+
+    try {
+      final client = DartQuery.of(context);
+      _queryCacheUnsub = client.getQueryCache().subscribe((_) {
+        if (mounted) setState(() {});
+      });
+      _mutationCacheUnsub = client.getMutationCache().subscribe((_) {
+        if (mounted) setState(() {});
+      });
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+
+    return Stack(
+      children: [
+        widget.child,
+        if (_isOpen) _buildPanel(context),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.small(
+            heroTag: 'dart_query_devtools',
+            onPressed: () => setState(() => _isOpen = !_isOpen),
+            backgroundColor: _isOpen ? Colors.red : Colors.deepPurple,
+            child: Icon(_isOpen ? Icons.close : Icons.bug_report, size: 20),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPanel(BuildContext context) {
+    final client = DartQuery.of(context);
+    final queryCache = client.getQueryCache();
+    final mutationCache = client.getMutationCache();
+
+    return Positioned(
+      left: 16,
+      right: 80,
+      bottom: 80,
+      child: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 360,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Column(
+            children: [
+              // Tab bar
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                ),
+                child: Row(
+                  children: [
+                    _TabButton(
+                      label: 'Queries (${queryCache.getAll().length})',
+                      isSelected: _tabIndex == 0,
+                      onTap: () => setState(() {
+                        _tabIndex = 0;
+                        _selectedQuery = null;
+                      }),
+                    ),
+                    _TabButton(
+                      label: 'Mutations (${mutationCache.getAll().length})',
+                      isSelected: _tabIndex == 1,
+                      onTap: () => setState(() {
+                        _tabIndex = 1;
+                        _selectedQuery = null;
+                      }),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.delete_sweep, size: 16),
+                      tooltip: 'Clear all',
+                      onPressed: () {
+                        client.clear();
+                        setState(() => _selectedQuery = null);
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
+
+              // Filter
+              if (_tabIndex == 0 && _selectedQuery == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: TextField(
+                    onChanged: (v) => setState(() => _filterText = v),
+                    decoration: const InputDecoration(
+                      hintText: 'Filter by key...',
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      border: OutlineInputBorder(),
+                      hintStyle: TextStyle(fontSize: 11),
+                    ),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+
+              // Content
+              Expanded(
+                child: _tabIndex == 0
+                    ? _selectedQuery != null
+                        ? QueryDetailView(
+                            query: _selectedQuery!,
+                            onBack: () => setState(() => _selectedQuery = null),
+                            onInvalidate: () {
+                              _selectedQuery!.invalidate();
+                              setState(() {});
+                            },
+                            onRemove: () {
+                              queryCache.remove(_selectedQuery!);
+                              setState(() => _selectedQuery = null);
+                            },
+                            onRefetch: () {
+                              _selectedQuery!.fetch().catchError((_) => null);
+                              setState(() {});
+                            },
+                            onReset: () {
+                              _selectedQuery!.reset();
+                              setState(() {});
+                            },
+                          )
+                        : QueryListView(
+                            queries: queryCache.getAll(),
+                            onQueryTap: (q) => setState(() => _selectedQuery = q),
+                            filterText: _filterText,
+                          )
+                    : MutationLogView(mutations: mutationCache.getAll()),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TabButton({required this.label, required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? Colors.deepPurple : Colors.transparent,
+              width: 2,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.deepPurple : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,6 +1,7 @@
 {
   "roots": [
     "dart_query",
+    "dart_query_devtools",
     "dart_query_flutter",
     "dart_query_workspace"
   ],
@@ -27,6 +28,18 @@
       "version": "0.1.0",
       "dependencies": [
         "dart_query",
+        "flutter"
+      ],
+      "devDependencies": [
+        "flutter_test"
+      ]
+    },
+    {
+      "name": "dart_query_devtools",
+      "version": "0.1.0",
+      "dependencies": [
+        "dart_query",
+        "dart_query_flutter",
         "flutter"
       ],
       "devDependencies": [

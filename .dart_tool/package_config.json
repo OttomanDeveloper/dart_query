@@ -366,6 +366,12 @@
       "rootUri": "../packages/dart_query_flutter",
       "packageUri": "lib/",
       "languageVersion": "3.5"
+    },
+    {
+      "name": "dart_query_devtools",
+      "rootUri": "../packages/dart_query_devtools",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     }
   ],
   "generator": "pub",
