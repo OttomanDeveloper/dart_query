@@ -3,10 +3,10 @@ description: >-
   Flutter adapter for tanquery. Widget builders for automatic caching,
   stale-while-revalidate, and background refetching. QueryBuilder,
   MutationBuilder, InfiniteQueryBuilder.
-version: 0.1.0
-homepage: https://github.com/OttomanDeveloper/dart_query
-repository: https://github.com/OttomanDeveloper/dart_query
-issue_tracker: https://github.com/OttomanDeveloper/dart_query/issues
+version: 0.2.0
+homepage: https://github.com/OttomanDeveloper/tanquery
+repository: https://github.com/OttomanDeveloper/tanquery
+issue_tracker: https://github.com/OttomanDeveloper/tanquery/issues
 topics:
   - flutter
   - cache
@@ -21,7 +21,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  tanquery: ^0.1.0
+  tanquery: ^0.2.0
 
 dev_dependencies:
   flutter_test:

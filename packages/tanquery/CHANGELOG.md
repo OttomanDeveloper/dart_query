@@ -1,3 +1,9 @@
+## 0.2.0
+
+- Updated repository URL to https://github.com/OttomanDeveloper/tanquery
+- Comprehensive beginner-friendly README with progressive disclosure
+- Before/after comparisons, API reference tables, architecture diagram
+
 ## 0.1.0
 
 - Initial release
