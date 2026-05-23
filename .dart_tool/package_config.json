@@ -350,26 +350,26 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "dart_query_workspace",
+      "name": "tanquery_workspace",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
-      "name": "dart_query",
-      "rootUri": "../packages/dart_query",
+      "name": "tanquery",
+      "rootUri": "../packages/tanquery",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
-      "name": "dart_query_flutter",
-      "rootUri": "../packages/dart_query_flutter",
+      "name": "tanquery_flutter",
+      "rootUri": "../packages/tanquery_flutter",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
-      "name": "dart_query_devtools",
-      "rootUri": "../packages/dart_query_devtools",
+      "name": "tanquery_devtools",
+      "rootUri": "../packages/tanquery_devtools",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     }

@@ -1,4 +1,4 @@
-# dart_query
+# tanquery
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Dart 3](https://img.shields.io/badge/Dart-3.5+-0175C2.svg)](https://dart.dev)
@@ -9,9 +9,9 @@
 
 | Package | Description | Version |
 |---|---|---|
-| [dart_query](packages/dart_query/) | Pure Dart core -- zero Flutter dependency | [![pub](https://img.shields.io/pub/v/dart_query.svg)](https://pub.dev/packages/dart_query) |
-| [dart_query_flutter](packages/dart_query_flutter/) | Flutter widget builders | [![pub](https://img.shields.io/pub/v/dart_query_flutter.svg)](https://pub.dev/packages/dart_query_flutter) |
-| [dart_query_devtools](packages/dart_query_devtools/) | Visual cache inspector overlay | [![pub](https://img.shields.io/pub/v/dart_query_devtools.svg)](https://pub.dev/packages/dart_query_devtools) |
+| [tanquery](packages/tanquery/) | Pure Dart core -- zero Flutter dependency | [![pub](https://img.shields.io/pub/v/tanquery.svg)](https://pub.dev/packages/tanquery) |
+| [tanquery_flutter](packages/tanquery_flutter/) | Flutter widget builders | [![pub](https://img.shields.io/pub/v/tanquery_flutter.svg)](https://pub.dev/packages/tanquery_flutter) |
+| [tanquery_devtools](packages/tanquery_devtools/) | Visual cache inspector overlay | [![pub](https://img.shields.io/pub/v/tanquery_devtools.svg)](https://pub.dev/packages/tanquery_devtools) |
 
 ## Before & After
 
@@ -58,7 +58,7 @@ Plus you get: caching, retries, background refetch on focus, request deduplicati
 ## Quick Start
 
 ```dart
-import 'package:dart_query_flutter/dart_query_flutter.dart';
+import 'package:tanquery_flutter/tanquery_flutter.dart';
 
 void main() => runApp(
   DartQueryProvider(

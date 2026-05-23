@@ -1,4 +1,4 @@
-name: dart_query_workspace
+name: tanquery_workspace
 packages:
   - packages/**
 
@@ -10,4 +10,4 @@ scripts:
   test:core:
     exec: dart test
     packageFilters:
-      scope: dart_query
+      scope: tanquery

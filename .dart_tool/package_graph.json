@@ -1,19 +1,19 @@
 {
   "roots": [
-    "dart_query",
-    "dart_query_devtools",
-    "dart_query_flutter",
-    "dart_query_workspace"
+    "tanquery",
+    "tanquery_devtools",
+    "tanquery_flutter",
+    "tanquery_workspace"
   ],
   "packages": [
     {
-      "name": "dart_query_workspace",
+      "name": "tanquery_workspace",
       "version": "0.0.0",
       "dependencies": [],
       "devDependencies": []
     },
     {
-      "name": "dart_query",
+      "name": "tanquery",
       "version": "0.1.0",
       "dependencies": [
         "meta"
@@ -24,23 +24,23 @@
       ]
     },
     {
-      "name": "dart_query_flutter",
+      "name": "tanquery_flutter",
       "version": "0.1.0",
       "dependencies": [
-        "dart_query",
-        "flutter"
+        "flutter",
+        "tanquery"
       ],
       "devDependencies": [
         "flutter_test"
       ]
     },
     {
-      "name": "dart_query_devtools",
+      "name": "tanquery_devtools",
       "version": "0.1.0",
       "dependencies": [
-        "dart_query",
-        "dart_query_flutter",
-        "flutter"
+        "flutter",
+        "tanquery",
+        "tanquery_flutter"
       ],
       "devDependencies": [
         "flutter_test"
