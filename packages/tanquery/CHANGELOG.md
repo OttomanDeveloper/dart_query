@@ -1,3 +1,18 @@
+## 0.6.0
+
+### Bug Fixes
+- **`setQueryData` with function updater no longer crashes when no prior data exists** -- Now accepts `TData? Function(TData?)` for nullable-safe updates instead of force-casting to non-nullable.
+- **Custom `focusManager`/`onlineManager` on QueryClient now propagated to all queries** -- Previously only affected MutationCache and mount lifecycle. Now QueryCache passes them through to every Query created via `build()`.
+- **`MutationObserver` per-call callbacks no longer silently skipped** -- `onSuccess`/`onError`/`onSettled` from `mutate()` args now fire regardless of subscriber count. Previously gated by `hasListeners`.
+- **`Query.reset()` now notifies observers and reschedules GC** -- Previously set state directly (bypassing `_dispatch`), causing memory leaks (no GC timer) and devtools missing the reset.
+
+## 0.5.0
+
+### Improvements
+- **Removed `Retryer.markAbortSignalConsumed()`** -- Dart has no AbortSignal equivalent. The mechanism was scaffolding with no call path. `removeObserver()` simplified to always use `cancelRetry()`.
+- **Removed `QueryObserver._onlineManager`** -- TanStack's QueryObserver has zero onlineManager reference. All online-awareness correctly delegated to Query/Retryer layers.
+- **Wired DevTools status filter** -- Added clickable status filter chips (all/fresh/stale/fetching/paused/error/inactive) to the query list panel. `QueryListView` now filters by status.
+
 ## 0.4.0
 
 ### Bug Fixes

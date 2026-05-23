@@ -1,3 +1,13 @@
+## 0.6.0
+
+### Bug Fixes
+- **InfiniteQueryBuilder: `_isFetchingPage` reset on widget reconfiguration** -- Previously stuck at `true` after config change (e.g., queryKey change), permanently blocking `fetchNextPage`/`fetchPreviousPage`.
+
+## 0.5.0
+
+### Improvements
+- No functional changes. Version bump for dependency compatibility with tanquery 0.5.0.
+
 ## 0.4.0
 
 ### Bug Fixes

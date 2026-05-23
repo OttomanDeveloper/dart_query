@@ -1,3 +1,13 @@
+## 0.6.0
+
+### Improvements
+- No functional changes. Version bump for dependency compatibility with tanquery 0.6.0.
+
+## 0.5.0
+
+### Features
+- **Status filter chips** -- Added clickable status filter bar (all/fresh/stale/fetching/paused/error/inactive) to the query list panel. Matches TanStack DevTools behavior.
+
 ## 0.4.0
 
 ### Bug Fixes
