@@ -362,5 +362,5 @@ class _MockObserver implements QueryUpdateCallback {
   @override
   bool shouldFetchOnReconnect() => false;
   @override
-  void refetch({bool cancelRefetch = true}) {}
+  Future<void> refetch({bool cancelRefetch = true}) async {}
 }

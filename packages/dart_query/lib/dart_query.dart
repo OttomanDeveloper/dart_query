@@ -23,3 +23,16 @@ export 'src/utils/time_utils.dart';
 export 'src/utils/functional_update.dart';
 export 'src/utils/list_utils.dart';
 export 'src/utils/skip_token.dart';
+
+// Query
+export 'src/query/query.dart';
+export 'src/query/query_cache.dart';
+export 'src/query/query_observer.dart';
+
+// Mutation
+export 'src/mutation/mutation.dart';
+export 'src/mutation/mutation_cache.dart';
+export 'src/mutation/mutation_observer.dart';
+
+// Client
+export 'src/query_client.dart';

@@ -5,7 +5,6 @@ import 'package:dart_query/src/query/query.dart';
 import 'package:dart_query/src/models/query_key.dart';
 import 'package:dart_query/src/models/query_state.dart';
 import 'package:dart_query/src/models/types.dart';
-import 'package:dart_query/src/core/cancelled_error.dart';
 import 'package:dart_query/src/core/focus_manager.dart';
 import 'package:dart_query/src/core/online_manager.dart';
 import 'package:dart_query/src/core/notify_manager.dart';
@@ -26,7 +25,7 @@ class MockObserver implements QueryUpdateCallback {
   bool shouldFetchOnReconnect() => _shouldFetchOnReconnect;
 
   @override
-  void refetch({bool cancelRefetch = true}) => refetchCount++;
+  Future<void> refetch({bool cancelRefetch = true}) async => refetchCount++;
 }
 
 void main() {

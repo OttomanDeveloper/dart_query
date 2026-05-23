@@ -2,7 +2,6 @@ import 'package:test/test.dart';
 import 'package:dart_query/src/mutation/mutation.dart';
 import 'package:dart_query/src/mutation/mutation_cache.dart';
 import 'package:dart_query/src/mutation/mutation_observer.dart';
-import 'package:dart_query/src/models/mutation_state.dart';
 import 'package:dart_query/src/models/types.dart';
 import 'package:dart_query/src/core/notify_manager.dart';
 import 'package:dart_query/src/core/focus_manager.dart';

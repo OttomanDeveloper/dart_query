@@ -4,7 +4,6 @@ import '../core/focus_manager.dart' as fm;
 import '../core/notify_manager.dart' as nm;
 import '../core/online_manager.dart' as om;
 import '../core/removable.dart';
-import '../core/subscribable.dart';
 import '../models/query_key.dart';
 import '../models/query_state.dart';
 import '../models/types.dart';
@@ -18,7 +17,7 @@ abstract class QueryUpdateCallback {
   void onQueryUpdate();
   bool shouldFetchOnWindowFocus() => false;
   bool shouldFetchOnReconnect() => false;
-  void refetch({bool cancelRefetch});
+  Future<void> refetch({bool cancelRefetch});
 }
 
 typedef CacheNotifyFn = void Function(Object event);
