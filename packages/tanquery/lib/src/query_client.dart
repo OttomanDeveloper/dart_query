@@ -38,7 +38,11 @@ class QueryClient {
     this.defaultRetryCount = 3,
     this.defaultNetworkMode = NetworkMode.online,
     this.defaultMutationRetryCount = 0,
-  })  : _queryCache = queryCache ?? QueryCache(notifyManager: notifyManager),
+  })  : _queryCache = queryCache ?? QueryCache(
+          notifyManager: notifyManager,
+          focusManager: focusManager,
+          onlineManager: onlineManager,
+        ),
         _mutationCache = mutationCache ?? MutationCache(
           notifyManager: notifyManager,
           focusManager: focusManager,
@@ -101,8 +105,10 @@ class QueryClient {
     );
     final prevData = query.state.data;
     final TData data;
-    if (updater is TData Function(TData)) {
-      data = updater(prevData as TData);
+    if (updater is TData? Function(TData?)) {
+      data = updater(prevData) as TData;
+    } else if (updater is TData Function(TData) && prevData != null) {
+      data = updater(prevData);
     } else {
       data = updater as TData;
     }

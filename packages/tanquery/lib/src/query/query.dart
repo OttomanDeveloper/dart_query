@@ -293,7 +293,8 @@ class Query<TData> extends Removable {
 
   void reset() {
     destroy();
-    state = _initialState;
+    _dispatch(_QueryAction.setState(_initialState));
+    scheduleGc();
   }
 
   // --- Staleness ---

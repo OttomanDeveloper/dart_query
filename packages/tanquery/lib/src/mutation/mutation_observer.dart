@@ -79,9 +79,9 @@ class MutationObserver<TData, TVariables> extends Subscribable<MutationObserverL
   void _onMutationUpdate(MutationActionType action) {
     _updateResult();
     _notifyManager.batch(() {
-      // Per-call callbacks fire first
-      if (hasListeners) {
-        final mutation = _currentMutation!;
+      // Per-call callbacks fire first (regardless of subscriber count)
+      final mutation = _currentMutation;
+      if (mutation != null) {
         if (action == MutationActionType.success && _mutateOnSuccess != null) {
           try {
             _mutateOnSuccess!(

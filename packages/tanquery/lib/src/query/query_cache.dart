@@ -1,4 +1,6 @@
+import '../core/focus_manager.dart' as fm;
 import '../core/notify_manager.dart' as nm;
+import '../core/online_manager.dart' as om;
 import '../core/subscribable.dart';
 import '../models/query_key.dart';
 import '../models/types.dart';
@@ -25,6 +27,8 @@ typedef QueryCacheListener = void Function(QueryCacheEvent event);
 class QueryCache extends Subscribable<QueryCacheListener> {
   final Map<String, Query> _queries = {};
   final nm.NotifyManager _notifyManager;
+  final fm.FocusManager? _focusManager;
+  final om.OnlineManager? _onlineManager;
 
   final void Function(Object? data, Query query)? onSuccess;
   final void Function(Object? error, Query query)? onError;
@@ -32,10 +36,14 @@ class QueryCache extends Subscribable<QueryCacheListener> {
 
   QueryCache({
     nm.NotifyManager? notifyManager,
+    fm.FocusManager? focusManager,
+    om.OnlineManager? onlineManager,
     this.onSuccess,
     this.onError,
     this.onSettled,
-  }) : _notifyManager = notifyManager ?? nm.notifyManager;
+  })  : _notifyManager = notifyManager ?? nm.notifyManager,
+        _focusManager = focusManager,
+        _onlineManager = onlineManager;
 
   Query<TData> build<TData>({
     required QueryKey queryKey,
@@ -70,6 +78,8 @@ class QueryCache extends Subscribable<QueryCacheListener> {
         meta: meta,
         queryType: queryType,
         notifyManager: _notifyManager,
+        focusManager: _focusManager,
+        onlineManager: _onlineManager,
         cacheNotify: (event) => _handleQueryNotify(event),
       );
       query.onRemove = () => remove(query!);

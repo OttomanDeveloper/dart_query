@@ -74,6 +74,7 @@ class _InfiniteQueryBuilderState<TPage, TParam>
         !identical(oldWidget.getPreviousPageParam, widget.getPreviousPageParam)) {
       _unsubscribe?.call();
       _observer?.destroy();
+      _isFetchingPage = false;
       _createObserver();
       _subscribe();
     }
