@@ -34,5 +34,15 @@ export 'src/mutation/mutation.dart';
 export 'src/mutation/mutation_cache.dart';
 export 'src/mutation/mutation_observer.dart';
 
+// Storage
+export 'src/storage/query_storage.dart';
+export 'src/storage/in_memory_storage.dart';
+
+// Hydration
+export 'src/hydration/hydration.dart';
+
+// Streamed
+export 'src/streamed/streamed_query.dart';
+
 // Client
 export 'src/query_client.dart';
